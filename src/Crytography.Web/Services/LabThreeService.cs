@@ -1,5 +1,6 @@
 ﻿using Crytography.Web.Models;
 using System.Numerics;
+using System.Text;
 
 namespace Crytography.Web.Services
 {
@@ -23,38 +24,47 @@ namespace Crytography.Web.Services
             return new Lab3Model(N, X, Q, Y, kx, ky, A, B);
         }
 
-        public static string Encrypt(string message, BigInteger sharedKey)
+
+        public static string Encrypt(string plaintext, BigInteger kx, BigInteger N)
         {
-            var encryptedChars = new List<string>();
-
-            foreach (var character in message)
+            var sb = new StringBuilder();
+            foreach (var c in plaintext)
             {
-                var charBigInt = new BigInteger(character);
-                var encryptedCharBigInt = BigInteger.ModPow(charBigInt, sharedKey, sharedKey);
-                encryptedChars.Add(encryptedCharBigInt.ToString());
+                var charValue = (BigInteger)c;
+                var encryptedValue = BigInteger.ModPow(charValue, kx, N); // возводим в степень
+                sb.Append(encryptedValue.ToString() + " ");
             }
-
-            return string.Join(" ", encryptedChars);
+            return sb.ToString().Trim();
         }
 
-        // Метод расшифрования с использованием общего секрета
-        public static string Decrypt(string ciphertext, BigInteger sharedKey)
+        public static string Decrypt(string ciphertext, BigInteger ky, BigInteger N)
         {
-            var encryptedChars = ciphertext.Split(' ');
-            var decryptedChars = new List<char>();
-
-            foreach (var encryptedChar in encryptedChars)
+            var sb = new StringBuilder();
+            var values = ciphertext.Split(' ');
+            foreach (var value in values)
             {
-                var encryptedCharBigInt = BigInteger.Parse(encryptedChar);
-                var decryptedCharBigInt = BigInteger.ModPow(encryptedCharBigInt, sharedKey, sharedKey);
-                var decryptedChar = (char)decryptedCharBigInt;
-                decryptedChars.Add(decryptedChar);
+                if (BigInteger.TryParse(value, out var encryptedValue))
+                {
+                    var decryptedChar = FindDiscreteLog(encryptedValue, ky, N); // типо логарифм
+                    sb.Append(decryptedChar);
+                }
             }
-
-            return new string(decryptedChars.ToArray());
+            return sb.ToString();
         }
 
-
+        private static char FindDiscreteLog(BigInteger encryptedValue, BigInteger ky, BigInteger N)
+        {
+            for (int i = 0; i < 256; i++) // Assuming ASCII characters
+            {
+                var testValue = (BigInteger)i;
+                var testEncryptedValue = BigInteger.ModPow(testValue, ky, N);
+                if (testEncryptedValue == encryptedValue)
+                {
+                    return (char)i;
+                }
+            }
+            throw new Exception("Discrete logarithm not found.");
+        }
 
 
     }

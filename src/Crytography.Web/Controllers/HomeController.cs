@@ -109,13 +109,13 @@ namespace Crytography.Controllers
 
                 if (action == "encrypt")
                 {
-                    ViewBag.EncryptedText = LabThreeService.Encrypt(inputText, model.Kx);
+                    ViewBag.EncryptedText = LabThreeService.Encrypt(inputText, model.Kx, model.N);
                 }
                 else if (action == "decrypt")
                 {
                     if (!string.IsNullOrEmpty(encryptedText) && encryptedText != null)
                     {
-                        ViewBag.DecryptedText = LabThreeService.Decrypt(encryptedText, model.Ky);
+                        ViewBag.DecryptedText = LabThreeService.Decrypt(encryptedText, model.Ky, model.N);
                     }
                 }
             }
