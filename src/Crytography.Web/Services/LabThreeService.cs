@@ -32,6 +32,7 @@ namespace Crytography.Web.Services
             {
                 var charValue = (BigInteger)c;
                 var encryptedValue = BigInteger.ModPow(charValue, kx, N); // возводим в степень
+                Console.WriteLine($"c: {c}; charValue: {charValue}; encryptedValue: {encryptedValue}");
                 sb.Append(encryptedValue.ToString() + " ");
             }
             return sb.ToString().Trim();
@@ -39,12 +40,14 @@ namespace Crytography.Web.Services
 
         public static string Decrypt(string ciphertext, BigInteger ky, BigInteger N)
         {
+            Console.WriteLine(ciphertext);
             var sb = new StringBuilder();
             var values = ciphertext.Split(' ');
             foreach (var value in values)
             {
                 if (BigInteger.TryParse(value, out var encryptedValue))
                 {
+                    Console.WriteLine($"value: {value} encryptedValue: {encryptedValue}");
                     var decryptedChar = FindDiscreteLog(encryptedValue, ky, N); // типо логарифм
                     sb.Append(decryptedChar);
                 }

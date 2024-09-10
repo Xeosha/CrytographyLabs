@@ -73,13 +73,14 @@ namespace Crytography.Controllers
                 {
                     encryptedText = LabTwoService.Encrypt(inputText, model.E, model.N);
                     ViewBag.EncryptedText = encryptedText;
+                    TempData["EncryptedText"] = encryptedText;
                 } else if (action == "decrypt" && encryptedText != null)
                 {
                     ViewBag.DecryptedText = LabTwoService.Decrypt(encryptedText, model.D, model.N);
                 }
             }
 
-            TempData["EncryptedText"] = encryptedText;
+            
 
             return View(model);
         }
@@ -109,20 +110,21 @@ namespace Crytography.Controllers
 
                 if (action == "encrypt")
                 {
-                    ViewBag.EncryptedText = LabThreeService.Encrypt(inputText, model.Kx, model.N);
+                    // Encrypt the input text and store it in TempData for future decryption
+                    encryptedText = LabThreeService.Encrypt(inputText, model.Kx, model.N);
+                    TempData["EncryptedText"] = encryptedText;
+                    ViewBag.EncryptedText = encryptedText;
                 }
-                else if (action == "decrypt")
+                else if (action == "decrypt" && encryptedText != null)
                 {
-                    if (!string.IsNullOrEmpty(encryptedText) && encryptedText != null)
-                    {
-                        ViewBag.DecryptedText = LabThreeService.Decrypt(encryptedText, model.Ky, model.N);
-                    }
+                    // Decrypt the text stored in TempData
+                    ViewBag.DecryptedText = LabThreeService.Decrypt(encryptedText, model.Ky, model.N);
                 }
             }
 
-            TempData["EncryptedText"] = encryptedText;
             return View(model);
         }
+
 
     }
 }
