@@ -1,0 +1,60 @@
+﻿@{
+    ViewData["Title"] = "Lab3";
+}
+@model Crytography.Web.Models.Lab3Model
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Лабораторная работа №3</h1>
+            <h2>Вариант №18</h2>
+            <p>Выполнить шифрование строки исходного текста, методом Диффи-Хеллмана, используя в качестве x и y простые числа с разрядностью не меньшей двадцати,
+                выполнив условие случайности x и y для каждого нового шифрования и используя в алгоритме шифрования функцию возведения в степень</p>
+        </header>
+
+        <form asp-action="Lab3" method="post">
+
+            <input type="hidden" name="N" value="@Model.N" />
+            <input type="hidden" name="Q" value="@Model.Q" />
+            <input type="hidden" name="X" value="@Model.X" />
+            <input type="hidden" name="Y" value="@Model.Y" />
+            <input type="hidden" name="Kx" value="@Model.Kx" />
+            <input type="hidden" name="Ky" value="@Model.Ky" />
+            <input type="hidden" name="A" value="@Model.A" />
+            <input type="hidden" name="B" value="@Model.B" />
+
+            <div class="form-group">
+                <label for="inputText">Исходный текст для шифровки:</label>
+                <textarea id="inputText" name="inputText" class="form-control">@ViewBag.InputText</textarea>
+            </div>
+            <button type="submit" name="action" value="generateKeys" class="btn btn-primary">Сгенерировать ключи</button>
+            <button type="submit" name="action" value="encrypt" class="btn btn-primary">Шифровать</button>
+            <button type="submit" name="action" value="decrypt" class="btn btn-primary">Дешифровать</button>
+        </form>
+
+
+        @if (Model != null)
+        {
+            <h2>Результаты</h2>
+            <p><strong>@Model.ToString()</strong></p>
+            @if (!string.IsNullOrEmpty(@ViewBag.EncryptedText))
+            {
+                <p><strong>Зашифрованный текст:</strong> @ViewBag.EncryptedText</p>
+            }
+
+            @if (!string.IsNullOrEmpty(@ViewBag.DecryptedText))
+            {
+                <p><strong>Расшифрованный текст:</strong> @ViewBag.DecryptedText</p>
+            }
+        }
+    </div>
+</body>
+</html>

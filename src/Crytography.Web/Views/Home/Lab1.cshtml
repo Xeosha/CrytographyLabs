@@ -1,0 +1,55 @@
+﻿@{
+    ViewData["Title"] = "Lab1";
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true">
+    <style>
+        .container {
+            max-width: 800px;
+            margin-top: 20px;
+        }
+        .textarea-container {
+            margin-bottom: 20px;
+        }
+        h1, h2 {
+            color: #343a40;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Лабораторная работа №1</h1>
+            <h2>Вариант №12</h2>
+            <p>Реализовать шифрование текстового сообщения, используя биграммный шифр Плейфейра</p>
+        </header>
+
+        <form asp-action="Lab1" method="post">
+            <div class="textarea-container">
+                <p>Ключ для таблицы:</p>
+                <textarea name="key" rows="1" cols="50" class="form-control">@ViewBag.Key</textarea>
+                <p>Фраза для шифрования:</p>
+                <textarea name="inputText" rows="4" cols="50" class="form-control">@ViewBag.InputText</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Шифровать</button>
+        </form>
+
+
+        @if (!string.IsNullOrEmpty(ViewBag.EncryptedText))
+        {
+            <footer class="footer">
+                <h2>Результат</h2>
+                <div class="result">
+                    <pre>@ViewBag.EncryptedText</pre>
+                </div>
+            </footer>
+        }
+    </div>
+</body>
+</html>
