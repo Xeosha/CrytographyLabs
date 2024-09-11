@@ -16,8 +16,8 @@ namespace Crytography.Web.Services
             }
 
             // Преобразуем текст и ключ в байты
-            byte[] textBytes = Encoding.ASCII.GetBytes(text);
-            byte[] keyBytes = Encoding.ASCII.GetBytes(key);
+            byte[] textBytes = Encoding.UTF8.GetBytes(text);
+            byte[] keyBytes = Encoding.UTF8.GetBytes(key);
 
             // Добавляем паддинг к тексту, чтобы длина была кратна размеру блока
             textBytes = PadBytes(textBytes, BlockSize / 8);
@@ -46,7 +46,7 @@ namespace Crytography.Web.Services
 
             // Преобразуем зашифрованный текст и ключ в байты
             byte[] cipherBytes = Convert.FromBase64String(cipherText);
-            byte[] keyBytes = Encoding.ASCII.GetBytes(key);
+            byte[] keyBytes = Encoding.UTF8.GetBytes(key);
 
             // Делим зашифрованный текст на блоки
             List<byte[]> blocks = SplitBytes(cipherBytes, BlockSize / 8);
@@ -59,7 +59,7 @@ namespace Crytography.Web.Services
             }
 
             // Соединяем расшифрованные блоки
-            return Encoding.ASCII.GetString(decryptedBlocks.SelectMany(b => b).ToArray());
+            return Encoding.UTF8.GetString(decryptedBlocks.SelectMany(b => b).ToArray());
         }
 
         // Шифрование одного блока 
