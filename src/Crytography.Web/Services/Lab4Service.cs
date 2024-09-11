@@ -58,8 +58,20 @@ namespace Crytography.Web.Services
                 decryptedBlocks.Add(DecryptBlock(block, keyBytes));
             }
 
+            byte[] decryptedBytes = decryptedBlocks.SelectMany(b => b).ToArray();
+
+            decryptedBytes = RemovePadding(decryptedBytes);
+
             // Соединяем расшифрованные блоки
-            return Encoding.UTF8.GetString(decryptedBlocks.SelectMany(b => b).ToArray());
+            return Encoding.UTF8.GetString(decryptedBytes);
+        }
+
+        private static byte[] RemovePadding(byte[] bytes)
+        {
+            int paddingLength = bytes[bytes.Length - 1]; // Последний байт хранит длину паддинга
+            byte[] result = new byte[bytes.Length - paddingLength];
+            Array.Copy(bytes, result, result.Length);
+            return result;
         }
 
         // Шифрование одного блока 
