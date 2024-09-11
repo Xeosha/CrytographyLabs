@@ -48,7 +48,7 @@ namespace Crytography.Web.Services
                 if (BigInteger.TryParse(value, out var encryptedValue))
                 {
                     Console.WriteLine($"value: {value} encryptedValue: {encryptedValue}");
-                    var decryptedChar = FindDiscreteLog(encryptedValue, ky, N); // типо логарифм
+                    var decryptedChar = FindDiscreteLog(encryptedValue, ky, N);
                     sb.Append(decryptedChar);
                 }
             }

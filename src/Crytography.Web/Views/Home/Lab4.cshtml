@@ -1,0 +1,85 @@
+﻿@{
+    ViewData["Title"] = "Lab4";
+}
+@model Crytography.Web.Models.Lab4Model
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true">
+</head>
+<body>
+    <div class="container my-5">
+        <header class="text-center mb-5">
+            <h1 class="display-4">Лабораторная работа №4</h1>
+            <h2 class="text-muted">Вариант №2</h2>
+            <p class="lead">
+                Реализовать шифрование текстового файла методом блочного шифрования, используя блоки длиной 16 бит и ключ длиной 32 бит.
+            </p>
+        </header>
+
+        <div class="row">
+            <!-- Поле для ввода ключа (общее) -->
+            <div class="col-12 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h2 class="card-title">Ключ для шифрования и дешифрования</h2>
+                        <div class="mb-3">
+                            <label for="key" class="form-label">Ключ (32-битное значение):</label>
+                            <input type="text" id="key" name="Key" maxlength="4" class="form-control" placeholder="Введите ключ" required value="@Model.Key" />
+                            <small class="text-muted">Ключ должен содержать 4 символа (32 бита).</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Карточка для шифрования файла -->
+            <div class="col-md-6">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h2 class="card-title">Шифрование файла</h2>
+                        <form asp-action="EncryptFile" method="post" enctype="multipart/form-data">
+                            <input type="hidden" name="Key" value="@Model.Key" />
+                            <div class="mb-3">
+                                <label for="file" class="form-label">Файл для шифрования:</label>
+                                <input type="file" id="file" name="EncryptedFilePath" class="form-control" required />
+                            </div>
+                            <div class="mb-3">
+                                <label for="encryptedFilePathSave" class="form-label">Путь для сохранения зашифрованного файла:</label>
+                                <input type="text" id="encryptedFilePathSave" name="EncryptedFilePathSave" class="form-control" placeholder="Введите имя файла для сохранения" required />
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Зашифровать файл</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Карточка для дешифрования файла -->
+            <div class="col-md-6">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h2 class="card-title">Дешифрование файла</h2>
+                        <form asp-action="DecryptFile" method="post" enctype="multipart/form-data">
+                            <input type="hidden" name="Key" value="@Model.Key" />
+                            <div class="mb-3">
+                                <label for="file" class="form-label">Файл для дешифрования:</label>
+                                <input type="file" id="file" name="DecryptedFilePath" class="form-control" required />
+                            </div>
+                            <div class="mb-3">
+                                <label for="decryptedFileSavePath" class="form-label">Путь для сохранения расшифрованного файла:</label>
+                                <input type="text" id="decryptedFileSavePath" name="DecryptedFileSavePath" class="form-control" placeholder="Введите имя файла для сохранения" required />
+                            </div>
+                            <button type="submit" class="btn btn-success w-100">Дешифровать файл</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
