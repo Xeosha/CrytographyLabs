@@ -1,7 +1,4 @@
-﻿@{
-    ViewData["Title"] = "Lab4";
-}
-@model Crytography.Web.Models.Lab4Model
+﻿@model Crytography.Web.Models.Lab4Model
 
 <!DOCTYPE html>
 <html lang="ru">
@@ -21,28 +18,17 @@
             </p>
         </header>
 
-        <div class="row">
-            <!-- Поле для ввода ключа (общее) -->
-            <div class="col-12 mb-4">
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <h2 class="card-title">Ключ для шифрования и дешифрования</h2>
-                        <div class="mb-3">
-                            <label for="key" class="form-label">Ключ (32-битное значение):</label>
-                            <input type="text" id="key" name="Key" maxlength="4" class="form-control" placeholder="Введите ключ" required value="@Model.Key" />
-                            <small class="text-muted">Ключ должен содержать 4 символа (32 бита).</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Карточка для шифрования файла -->
             <div class="col-md-6">
                 <div class="card shadow-sm mb-4">
                     <div class="card-body">
                         <h2 class="card-title">Шифрование файла</h2>
                         <form asp-action="EncryptFile" method="post" enctype="multipart/form-data">
-                            <input type="hidden" name="Key" value="@Model.Key" />
+                            <div class="mb-3">
+                                <label for="key" class="form-label">Ключ (32-битное значение):</label>
+                                <input type="text" id="key" name="Key" maxlength="32" class="form-control" placeholder="Введите ключ" required value="@Model.Key" />
+                                <small class="text-muted">Ключ должен содержать 32 символа (32 бита).</small>
+                            </div>
                             <div class="mb-3">
                                 <label for="file" class="form-label">Файл для шифрования:</label>
                                 <input type="file" id="file" name="EncryptedFilePath" class="form-control" required />
@@ -63,7 +49,11 @@
                     <div class="card-body">
                         <h2 class="card-title">Дешифрование файла</h2>
                         <form asp-action="DecryptFile" method="post" enctype="multipart/form-data">
-                            <input type="hidden" name="Key" value="@Model.Key" />
+                            <div class="mb-3">
+                                <label for="key" class="form-label">Ключ (32-битное значение):</label>
+                                <input type="text" id="key" name="Key" maxlength="32" class="form-control" placeholder="Введите ключ" required value="@Model.Key" />
+                                <small class="text-muted">Ключ должен содержать 32 символа (32 бита).</small>
+                            </div>
                             <div class="mb-3">
                                 <label for="file" class="form-label">Файл для дешифрования:</label>
                                 <input type="file" id="file" name="DecryptedFilePath" class="form-control" required />

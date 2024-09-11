@@ -140,11 +140,14 @@ namespace Crytography.Controllers
         public async Task<IActionResult> EncryptFile(Lab4Model model)
         {
             // Validate file inputs
-            if (model.EncryptedFilePath == null || string.IsNullOrWhiteSpace(model.EncryptedFilePathSave))
+            if (model.EncryptedFilePath == null || string.IsNullOrWhiteSpace(model.EncryptedFilePathSave) || string.IsNullOrEmpty(model.Key))
             {
-                ModelState.AddModelError(string.Empty, "Пожалуйста, выберите файл для копирования и введите имя для сохранения.");
+                ModelState.AddModelError(string.Empty, "Пожалуйста, выберите файл, введите имя для сохранения и ключ.");
+                Console.WriteLine("Key: " + model.Key);
                 return View("Lab4", model);
             }
+
+            Console.WriteLine("Key2: " + model.Key);
 
             // Read the uploaded file into a byte array
             byte[] fileBytes;
@@ -153,8 +156,49 @@ namespace Crytography.Controllers
                 fileBytes = await ReadFullyAsync(inputStream);
             }
 
-            // Return the file directly to the user for download
-            return File(fileBytes, "application/octet-stream", model.EncryptedFilePathSave);
+            // Convert the file bytes to a string for encryption
+            var plaintext = System.Text.Encoding.UTF8.GetString(fileBytes);
+
+            // Encrypt the file content
+            var encryptedText = Lab4Service.Encrypt(plaintext, model.Key);
+
+            // Convert the encrypted text back to bytes
+            var encryptedBytes = System.Text.Encoding.UTF8.GetBytes(encryptedText);
+
+            // Return the encrypted file directly to the user for download
+            return File(encryptedBytes, "application/octet-stream", model.EncryptedFilePathSave);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DecryptFile(Lab4Model model)
+        {
+            if (model.DecryptedFilePath == null || string.IsNullOrWhiteSpace(model.DecryptedFileSavePath) || string.IsNullOrEmpty(model.Key))
+            {
+                Console.WriteLine($"{model.DecryptedFilePath} : {model.DecryptedFileSavePath} : {model.Key}");
+                ModelState.AddModelError(string.Empty, "Пожалуйста, выберите файл, введите имя для сохранения и ключ.");
+                return View("Lab4", model);
+            }
+
+            Console.WriteLine("Key2: " + model.Key);
+
+            // Read the uploaded file into a byte array
+            byte[] fileBytes;
+            using (var inputStream = model.DecryptedFilePath.OpenReadStream())
+            {
+                fileBytes = await ReadFullyAsync(inputStream);
+            }
+
+            // Convert the file bytes to a string for decryption
+            var encryptedText = System.Text.Encoding.UTF8.GetString(fileBytes);
+
+            // Decrypt the file content
+            var decryptedText = Lab4Service.Decrypt(encryptedText, model.Key);
+
+            // Convert the decrypted text back to bytes
+            var decryptedBytes = System.Text.Encoding.UTF8.GetBytes(decryptedText);
+
+            // Return the decrypted file directly to the user for download
+            return File(decryptedBytes, "application/octet-stream", model.DecryptedFileSavePath);
         }
 
         // Helper method to read a stream into a byte array

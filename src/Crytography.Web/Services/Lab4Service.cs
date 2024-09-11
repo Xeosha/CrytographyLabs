@@ -4,116 +4,164 @@ namespace Crytography.Web.Services
 {
     public static class Lab4Service
     {
-        private const int BLOCK_SIZE = 16; // 16 бит (2 байта)
-        private const int CHAR_SIZE = 8; // 8 бит для одного символа
-        private const int KEY_SIZE = 32; // 32 бита (4 байта)
-        private const int ROUNDS = 16; // Количество раундов
+        private const int BlockSize = 16; // Размер блока в битах
+        private const int KeySize = 32; // Размер ключа в битах
 
-
-        private static string XOR(string s1, string s2)
+        public static string Encrypt(string text, string key)
         {
-            var result = new StringBuilder();
-            for (int i = 0; i < s1.Length; i++)
+            // Проверяем длину ключа
+            if (key.Length != KeySize)
             {
-                result.Append(s1[i] == s2[i] ? '0' : '1');
-            }
-            return result.ToString();
-        }
-
-        private static string FFunction(string halfBlock, string roundKey)
-        {
-            return XOR(halfBlock, roundKey);
-        }
-
-        private static string ShiftKey(string key, int round)
-        {
-            return key.Substring(round % KEY_SIZE) + key.Substring(0, round % KEY_SIZE);
-        }
-
-        public static string Encrypt(string plaintext, string key)
-        {
-            if (key.Length != KEY_SIZE / CHAR_SIZE)
-                throw new ArgumentException($"Key must be {KEY_SIZE / CHAR_SIZE} characters long.");
-
-            var plaintextBinary = ToBinaryString(plaintext);
-            var blocks = DivideIntoBlocks(plaintextBinary);
-
-            var result = new StringBuilder();
-            foreach (var block in blocks)
-            {
-                var left = block.Substring(0, BLOCK_SIZE / 2);
-                var right = block.Substring(BLOCK_SIZE / 2);
-
-                for (int i = 0; i < ROUNDS; i++)
-                {
-                    var roundKey = ShiftKey(key, i);
-                    var newRight = XOR(left, FFunction(right, roundKey));
-                    left = right;
-                    right = newRight;
-                }
-
-                result.Append(left + right);
+                throw new ArgumentException("Ключ должен быть длиной 32 бита (4 байта)");
             }
 
-            return FromBinaryString(result.ToString());
-        }
+            // Преобразуем текст и ключ в байты
+            byte[] textBytes = Encoding.ASCII.GetBytes(text);
+            byte[] keyBytes = Encoding.ASCII.GetBytes(key);
 
-        public static string Decrypt(string ciphertext, string key)
-        {
-            if (key.Length != KEY_SIZE / CHAR_SIZE)
-                throw new ArgumentException($"Key must be {KEY_SIZE / CHAR_SIZE} characters long.");
+            // Добавляем паддинг к тексту, чтобы длина была кратна размеру блока
+            textBytes = PadBytes(textBytes, BlockSize / 8);
 
-            var ciphertextBinary = ToBinaryString(ciphertext);
-            var blocks = DivideIntoBlocks(ciphertextBinary);
+            // Делим текст на блоки
+            List<byte[]> blocks = SplitBytes(textBytes, BlockSize / 8);
 
-            var result = new StringBuilder();
-            foreach (var block in blocks)
+            // Шифруем каждый блок
+            List<byte[]> encryptedBlocks = new List<byte[]>();
+            foreach (byte[] block in blocks)
             {
-                var left = block.Substring(0, BLOCK_SIZE / 2);
-                var right = block.Substring(BLOCK_SIZE / 2);
-
-                for (int i = ROUNDS - 1; i >= 0; i--)
-                {
-                    var roundKey = ShiftKey(key, i);
-                    var newLeft = XOR(right, FFunction(left, roundKey));
-                    right = left;
-                    left = newLeft;
-                }
-
-                result.Append(left + right);
+                encryptedBlocks.Add(EncryptBlock(block, keyBytes));
             }
 
-            return FromBinaryString(result.ToString());
+            // Соединяем зашифрованные блоки
+            return Convert.ToBase64String(encryptedBlocks.SelectMany(b => b).ToArray());
         }
 
-        private static string ToBinaryString(string input)
+        public static string Decrypt(string cipherText, string key)
         {
-            var sb = new StringBuilder();
-            foreach (char c in input)
+            // Проверяем длину ключа
+            if (key.Length != KeySize)
             {
-                sb.Append(Convert.ToString(c, 2).PadLeft(CHAR_SIZE, '0'));
+                throw new ArgumentException("Ключ должен быть длиной 32 бита (4 байта)");
             }
-            return sb.ToString();
-        }
 
-        private static string FromBinaryString(string binaryString)
-        {
-            var sb = new StringBuilder();
-            for (int i = 0; i < binaryString.Length; i += CHAR_SIZE)
+            // Преобразуем зашифрованный текст и ключ в байты
+            byte[] cipherBytes = Convert.FromBase64String(cipherText);
+            byte[] keyBytes = Encoding.ASCII.GetBytes(key);
+
+            // Делим зашифрованный текст на блоки
+            List<byte[]> blocks = SplitBytes(cipherBytes, BlockSize / 8);
+
+            // Расшифровываем каждый блок
+            List<byte[]> decryptedBlocks = new List<byte[]>();
+            foreach (byte[] block in blocks)
             {
-                var byteString = binaryString.Substring(i, CHAR_SIZE);
-                sb.Append((char)Convert.ToInt32(byteString, 2));
+                decryptedBlocks.Add(DecryptBlock(block, keyBytes));
             }
-            return sb.ToString();
+
+            // Соединяем расшифрованные блоки
+            return Encoding.ASCII.GetString(decryptedBlocks.SelectMany(b => b).ToArray());
         }
 
-        private static string[] DivideIntoBlocks(string binaryString)
+        // Шифрование одного блока 
+        private static byte[] EncryptBlock(byte[] block, byte[] key)
         {
-            var blockCount = binaryString.Length / BLOCK_SIZE;
-            var blocks = new string[blockCount];
-            for (int i = 0; i < blockCount; i++)
+            // Разделяем блок на две половины
+            byte[] left = new byte[BlockSize / 16];
+            byte[] right = new byte[BlockSize / 16];
+            Array.Copy(block, 0, left, 0, BlockSize / 16);
+            Array.Copy(block, BlockSize / 16, right, 0, BlockSize / 16);
+
+            // Выполняем 4 раунда шифрования
+            for (int i = 0; i < 4; i++)
             {
-                blocks[i] = binaryString.Substring(i * BLOCK_SIZE, BLOCK_SIZE);
+                // Ф-функция
+                byte[] fResult = FeistelFunction(right, key);
+
+                // XOR левой половины с результатом F-функции
+                left = XOR(left, fResult);
+
+                // Меняем половины местами
+                byte[] temp = left;
+                left = right;
+                right = temp;
+            }
+
+            // Соединяем половины обратно в один блок
+            byte[] result = new byte[BlockSize / 8];
+            Array.Copy(left, 0, result, 0, BlockSize / 16);
+            Array.Copy(right, 0, result, BlockSize / 16, BlockSize / 16);
+            return result;
+        }
+
+        // Расшифрование одного блока
+        private static byte[] DecryptBlock(byte[] block, byte[] key)
+        {
+            // Разделяем блок на две половины
+            byte[] left = new byte[BlockSize / 16];
+            byte[] right = new byte[BlockSize / 16];
+            Array.Copy(block, 0, left, 0, BlockSize / 16);
+            Array.Copy(block, BlockSize / 16, right, 0, BlockSize / 16);
+
+            // Выполняем 4 раунда расшифрования
+            for (int i = 0; i < 4; i++)
+            {
+                // Меняем половины местами
+                byte[] temp = left;
+                left = right;
+                right = temp;
+
+                // XOR левой половины с результатом F-функции
+                byte[] fResult = FeistelFunction(right, key);
+                left = XOR(left, fResult);
+            }
+
+            // Соединяем половины обратно в один блок
+            byte[] result = new byte[BlockSize / 8];
+            Array.Copy(left, 0, result, 0, BlockSize / 16);
+            Array.Copy(right, 0, result, BlockSize / 16, BlockSize / 16);
+            return result;
+        }
+
+        // F-функция
+        private static byte[] FeistelFunction(byte[] input, byte[] key)
+        {
+            // Простая реализация F-функции: XOR с ключом
+            return XOR(input, key);
+        }
+
+        // XOR двух массивов байтов
+        private static byte[] XOR(byte[] a, byte[] b)
+        {
+            byte[] result = new byte[a.Length];
+            for (int i = 0; i < a.Length; i++)
+            {
+                result[i] = (byte)(a[i] ^ b[i]);
+            }
+            return result;
+        }
+
+        // Добавляет паддинг к массиву байтов
+        private static byte[] PadBytes(byte[] bytes, int blockSize)
+        {
+            int paddingLength = blockSize - (bytes.Length % blockSize);
+            byte[] paddedBytes = new byte[bytes.Length + paddingLength];
+            bytes.CopyTo(paddedBytes, 0);
+            for (int i = 0; i < paddingLength; i++)
+            {
+                paddedBytes[bytes.Length + i] = (byte)paddingLength;
+            }
+            return paddedBytes;
+        }
+
+        // Делит массив байтов на блоки
+        private static List<byte[]> SplitBytes(byte[] bytes, int blockSize)
+        {
+            List<byte[]> blocks = new List<byte[]>();
+            for (int i = 0; i < bytes.Length; i += blockSize)
+            {
+                byte[] block = new byte[blockSize];
+                Array.Copy(bytes, i, block, 0, blockSize);
+                blocks.Add(block);
             }
             return blocks;
         }
