@@ -1,6 +1,7 @@
 ﻿using Crytography.Web.Models;
 using Crytography.Web.Services;
 using System.Numerics;
+using System.Text;
 
 namespace Cryptography.Web.Services
 {
@@ -20,7 +21,7 @@ namespace Cryptography.Web.Services
             do
             {
                 E = GlobalService.GeneratePrime(cap);
-            } while (E >= phi && GCD(E, phi) != 1);
+            } while (E >= phi || GCD(E, phi) != 1);
 
             var (D, Y) = ExtendedGCD(E, phi);
 
@@ -54,7 +55,6 @@ namespace Cryptography.Web.Services
             }
             return a;
         }
-
 
         public static string Encrypt(string plaintext, BigInteger E, BigInteger N)
         {
@@ -103,6 +103,10 @@ namespace Cryptography.Web.Services
             // Преобразуем список символов обратно в строку
             return new string(decryptedChars.ToArray());
         }
+
+
+
+
 
     }
 }

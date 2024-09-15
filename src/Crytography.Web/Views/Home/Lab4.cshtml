@@ -28,8 +28,8 @@
                         <form asp-action="EncryptFile" method="post" enctype="multipart/form-data">
                             <div class="mb-3">
                                 <label for="key" class="form-label">Ключ (32-битное значение):</label>
-                                <input type="text" id="key" name="Key" maxlength="32" class="form-control" placeholder="Введите ключ" required value="@Model.Key" />
-                                <small class="text-muted">Ключ должен содержать 32 символа (32 бита).</small>
+                                <input type="text" id="key" name="Key" maxlength="4" class="form-control" placeholder="Введите ключ" required value="@Model.Key" />
+                                <small class="text-muted">Ключ должен содержать 4 символа (32 бита).</small>
                             </div>
                             <div class="mb-3">
                                 <label for="file" class="form-label">Файл для шифрования:</label>
@@ -53,8 +53,8 @@
                         <form asp-action="DecryptFile" method="post" enctype="multipart/form-data">
                             <div class="mb-3">
                                 <label for="key" class="form-label">Ключ (32-битное значение):</label>
-                                <input type="text" id="key" name="Key" maxlength="32" class="form-control" placeholder="Введите ключ" required value="@Model.Key" />
-                                <small class="text-muted">Ключ должен содержать 32 символа (32 бита).</small>
+                                <input type="text" id="key" name="Key" maxlength="4" class="form-control" placeholder="Введите ключ" required value="@Model.Key" />
+                                <small class="text-muted">Ключ должен содержать 4 символа (32 бита).</small>
                             </div>
                             <div class="mb-3">
                                 <label for="file" class="form-label">Файл для дешифрования:</label>

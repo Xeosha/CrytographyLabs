@@ -7,8 +7,6 @@ namespace Crytography.Services
     {
         private static readonly IEnumerable<char> _alphabat = Enumerable.Range(0x0410, 32)
                                             .Select(i => (char)i);
-        public static async Task<string> EncryptAsync(string inputText, string key)
-            => await Task.Run(() => Encrypt(inputText, key));
 
         public static string Encrypt(string inputText, string key)
         {

@@ -10,8 +10,8 @@ namespace Crytography.Web.Services
 
         public static Lab3Model GenerateKeys()
         {
-            var N = GlobalService.GeneratePrime(CAP / 2);
-            var Q = GlobalService.GeneratePrime(CAP / 2);
+            var N = GlobalService.GeneratePrime(CAP);
+            var Q = GlobalService.GeneratePrime(CAP);
             var X = GlobalService.GeneratePrime(CAP);
             var Y = GlobalService.GeneratePrime(CAP);
 
@@ -25,14 +25,15 @@ namespace Crytography.Web.Services
         }
 
 
+
         public static string Encrypt(string plaintext, BigInteger kx, BigInteger N)
         {
+            var bytes = Encoding.UTF8.GetBytes(plaintext);
             var sb = new StringBuilder();
-            foreach (var c in plaintext)
+            foreach (var b in bytes)
             {
-                var charValue = (BigInteger)c;
-                var encryptedValue = BigInteger.ModPow(charValue, kx, N); // возводим в степень
-                Console.WriteLine($"c: {c}; charValue: {charValue}; encryptedValue: {encryptedValue}");
+                var byteValue = (BigInteger)b;
+                var encryptedValue = BigInteger.ModPow(byteValue, kx, N);
                 sb.Append(encryptedValue.ToString() + " ");
             }
             return sb.ToString().Trim();
@@ -40,35 +41,32 @@ namespace Crytography.Web.Services
 
         public static string Decrypt(string ciphertext, BigInteger ky, BigInteger N)
         {
-            Console.WriteLine(ciphertext);
             var sb = new StringBuilder();
             var values = ciphertext.Split(' ');
+            var decryptedBytes = new List<byte>();
             foreach (var value in values)
             {
                 if (BigInteger.TryParse(value, out var encryptedValue))
                 {
-                    Console.WriteLine($"value: {value} encryptedValue: {encryptedValue}");
-                    var decryptedChar = FindDiscreteLog(encryptedValue, ky, N);
-                    sb.Append(decryptedChar);
+                    var decryptedByte = FindDiscreteLog(encryptedValue, ky, N);
+                    decryptedBytes.Add(decryptedByte);
                 }
             }
-            return sb.ToString();
+            return Encoding.UTF8.GetString(decryptedBytes.ToArray());
         }
 
-        private static char FindDiscreteLog(BigInteger encryptedValue, BigInteger ky, BigInteger N)
+        private static byte FindDiscreteLog(BigInteger encryptedValue, BigInteger ky, BigInteger N)
         {
-            for (int i = 0; i < 256; i++) // Assuming ASCII characters
+            for (int i = 0; i < 256; i++) 
             {
                 var testValue = (BigInteger)i;
                 var testEncryptedValue = BigInteger.ModPow(testValue, ky, N);
                 if (testEncryptedValue == encryptedValue)
                 {
-                    return (char)i;
+                    return (byte)i;
                 }
             }
             throw new Exception("Discrete logarithm not found.");
         }
-
-
     }
 }

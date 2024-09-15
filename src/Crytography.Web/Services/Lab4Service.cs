@@ -4,144 +4,122 @@ namespace Crytography.Web.Services
 {
     public static class Lab4Service
     {
-        private const int BlockSize = 16; // Размер блока в битах
-        private const int KeySize = 32; // Размер ключа в битах
+        private static readonly int BlockSize = 2; // 2 байта (16 бит)
+        private static readonly int KeySize = 4; // 4 байта (32 бита)
+        private static readonly int Rounds = 8; // Количество раундов в сети Фейштеля
 
-        public static string Encrypt(string text, string key)
+        public static string Encrypt(string plaintext, byte[] key)
         {
-            // Проверяем длину ключа
             if (key.Length != KeySize)
+                throw new ArgumentException($"Ключ должен быть {KeySize} байта длиной.");
+
+            byte[] plaintextBytes = Encoding.UTF8.GetBytes(plaintext);
+
+            // Разбиваем текст на блоки по 2 байта
+            int blocksCount = (int)Math.Ceiling((double)plaintextBytes.Length / BlockSize);
+            byte[] ciphertext = new byte[blocksCount * BlockSize];
+
+            for (int i = 0; i < blocksCount; i++)
             {
-                throw new ArgumentException("Ключ должен быть длиной 32 бита (4 байта)");
+                byte[] block = new byte[BlockSize];
+                Array.Copy(plaintextBytes, i * BlockSize, block, 0, Math.Min(BlockSize, plaintextBytes.Length - i * BlockSize));
+
+                // Заполняем блок до 2 байт, если не хватает
+                if (block.Length < BlockSize)
+                {
+                    Array.Resize(ref block, BlockSize);
+                }   
+
+                // Шифруем блок
+                byte[] encryptedBlock = FeistelNetwork(block, key, true);
+                Array.Copy(encryptedBlock, 0, ciphertext, i * BlockSize, BlockSize);
             }
 
-            // Преобразуем текст и ключ в байты
-            byte[] textBytes = Encoding.UTF8.GetBytes(text);
-            byte[] keyBytes = Encoding.UTF8.GetBytes(key);
-
-            // Добавляем паддинг к тексту, чтобы длина была кратна размеру блока
-            textBytes = PadBytes(textBytes, BlockSize / 8);
-
-            // Делим текст на блоки
-            List<byte[]> blocks = SplitBytes(textBytes, BlockSize / 8);
-
-            // Шифруем каждый блок
-            List<byte[]> encryptedBlocks = new List<byte[]>();
-            foreach (byte[] block in blocks)
-            {
-                encryptedBlocks.Add(EncryptBlock(block, keyBytes));
-            }
-
-            // Соединяем зашифрованные блоки
-            return Convert.ToBase64String(encryptedBlocks.SelectMany(b => b).ToArray());
+            return Convert.ToBase64String(ciphertext);
         }
 
-        public static string Decrypt(string cipherText, string key)
+        // Дешифрование текста
+        public static string Decrypt(string ciphertext, byte[] key)
         {
-            // Проверяем длину ключа
             if (key.Length != KeySize)
+                throw new ArgumentException($"Ключ должен быть {KeySize} байта длиной.");
+
+            byte[] ciphertextBytes = Convert.FromBase64String(ciphertext);
+
+            int blocksCount = ciphertextBytes.Length / BlockSize;
+            byte[] plaintextBytes = new byte[blocksCount * BlockSize];
+
+            for (int i = 0; i < blocksCount; i++)
             {
-                throw new ArgumentException("Ключ должен быть длиной 32 бита (4 байта)");
+                byte[] block = new byte[BlockSize];
+                Array.Copy(ciphertextBytes, i * BlockSize, block, 0, BlockSize);
+
+                // Дешифруем блок
+                byte[] decryptedBlock = FeistelNetwork(block, key, false);
+                Array.Copy(decryptedBlock, 0, plaintextBytes, i * BlockSize, BlockSize);
             }
 
-            // Преобразуем зашифрованный текст и ключ в байты
-            byte[] cipherBytes = Convert.FromBase64String(cipherText);
-            byte[] keyBytes = Encoding.UTF8.GetBytes(key);
-
-            // Делим зашифрованный текст на блоки
-            List<byte[]> blocks = SplitBytes(cipherBytes, BlockSize / 8);
-
-            // Расшифровываем каждый блок
-            List<byte[]> decryptedBlocks = new List<byte[]>();
-            foreach (byte[] block in blocks)
-            {
-                decryptedBlocks.Add(DecryptBlock(block, keyBytes));
-            }
-
-            byte[] decryptedBytes = decryptedBlocks.SelectMany(b => b).ToArray();
-
-            decryptedBytes = RemovePadding(decryptedBytes);
-
-            // Соединяем расшифрованные блоки
-            return Encoding.UTF8.GetString(decryptedBytes);
+            return Encoding.UTF8.GetString(plaintextBytes).TrimEnd('\0'); // Убираем лишние null байты
         }
 
-        private static byte[] RemovePadding(byte[] bytes)
+        // Функция сети Фейштеля (F-функция)
+        private static byte[] FeistelFunction(byte[] halfBlock, byte[] roundKey)
         {
-            int paddingLength = bytes[bytes.Length - 1]; // Последний байт хранит длину паддинга
-            byte[] result = new byte[bytes.Length - paddingLength];
-            Array.Copy(bytes, result, result.Length);
+            byte[] result = new byte[halfBlock.Length];
+            for (int i = 0; i < halfBlock.Length; i++)
+            {
+                result[i] = (byte)(halfBlock[i] ^ roundKey[i % roundKey.Length]);
+            }
             return result;
         }
 
-        // Шифрование одного блока 
-        private static byte[] EncryptBlock(byte[] block, byte[] key)
+        // Реализация сети Фейштеля
+        private static byte[] FeistelNetwork(byte[] block, byte[] key, bool encrypt)
         {
-            // Разделяем блок на две половины
-            byte[] left = new byte[BlockSize / 16];
-            byte[] right = new byte[BlockSize / 16];
-            Array.Copy(block, 0, left, 0, BlockSize / 16);
-            Array.Copy(block, BlockSize / 16, right, 0, BlockSize / 16);
+            byte[] left = new byte[BlockSize / 2];
+            byte[] right = new byte[BlockSize / 2];
 
-            // Выполняем 4 раунда шифрования
-            for (int i = 0; i < 4; i++)
+            // Разделяем блок на левую и правую части
+            Array.Copy(block, 0, left, 0, BlockSize / 2);
+            Array.Copy(block, BlockSize / 2, right, 0, BlockSize / 2);
+
+            // Создание раундовых ключей
+            byte[][] roundKeys = GenerateRoundKeys(key);
+
+            if (!encrypt)
             {
-                // Ф-функция
-                byte[] fResult = FeistelFunction(right, key);
-
-                // XOR левой половины с результатом F-функции
-                left = XOR(left, fResult);
-
-                // Меняем половины местами
-                byte[] temp = left;
-                left = right;
-                right = temp;
+                Array.Reverse(roundKeys); // Для дешифрования ключи используются в обратном порядке
             }
 
-            // Соединяем половины обратно в один блок
-            byte[] result = new byte[BlockSize / 8];
-            Array.Copy(left, 0, result, 0, BlockSize / 16);
-            Array.Copy(right, 0, result, BlockSize / 16, BlockSize / 16);
+            // Раунды Фейштеля
+            for (int round = 0; round < Rounds; round++)
+            {
+                byte[] temp = right;
+                right = XOR(left, FeistelFunction(right, roundKeys[round]));
+                left = temp;
+            }
+
+            // Соединяем левую и правую части
+            byte[] result = new byte[BlockSize];
+            Array.Copy(right, 0, result, 0, BlockSize / 2);
+            Array.Copy(left, 0, result, BlockSize / 2, BlockSize / 2);
+
             return result;
         }
 
-        // Расшифрование одного блока
-        private static byte[] DecryptBlock(byte[] block, byte[] key)
+        // Генерация раундовых ключей
+        private static byte[][] GenerateRoundKeys(byte[] key)
         {
-            // Разделяем блок на две половины
-            byte[] left = new byte[BlockSize / 16];
-            byte[] right = new byte[BlockSize / 16];
-            Array.Copy(block, 0, left, 0, BlockSize / 16);
-            Array.Copy(block, BlockSize / 16, right, 0, BlockSize / 16);
-
-            // Выполняем 4 раунда расшифрования
-            for (int i = 0; i < 4; i++)
+            byte[][] roundKeys = new byte[Rounds][];
+            for (int i = 0; i < Rounds; i++)
             {
-                // Меняем половины местами
-                byte[] temp = left;
-                left = right;
-                right = temp;
-
-                // XOR левой половины с результатом F-функции
-                byte[] fResult = FeistelFunction(right, key);
-                left = XOR(left, fResult);
+                roundKeys[i] = new byte[BlockSize / 2];
+                Array.Copy(key, (i % key.Length), roundKeys[i], 0, BlockSize / 2);
             }
-
-            // Соединяем половины обратно в один блок
-            byte[] result = new byte[BlockSize / 8];
-            Array.Copy(left, 0, result, 0, BlockSize / 16);
-            Array.Copy(right, 0, result, BlockSize / 16, BlockSize / 16);
-            return result;
+            return roundKeys;
         }
 
-        // F-функция
-        private static byte[] FeistelFunction(byte[] input, byte[] key)
-        {
-            // Простая реализация F-функции: XOR с ключом
-            return XOR(input, key);
-        }
-
-        // XOR двух массивов байтов
+        // Операция XOR для двух массивов
         private static byte[] XOR(byte[] a, byte[] b)
         {
             byte[] result = new byte[a.Length];
@@ -150,32 +128,6 @@ namespace Crytography.Web.Services
                 result[i] = (byte)(a[i] ^ b[i]);
             }
             return result;
-        }
-
-        // Добавляет паддинг к массиву байтов
-        private static byte[] PadBytes(byte[] bytes, int blockSize)
-        {
-            int paddingLength = blockSize - (bytes.Length % blockSize);
-            byte[] paddedBytes = new byte[bytes.Length + paddingLength];
-            bytes.CopyTo(paddedBytes, 0);
-            for (int i = 0; i < paddingLength; i++)
-            {
-                paddedBytes[bytes.Length + i] = (byte)paddingLength;
-            }
-            return paddedBytes;
-        }
-
-        // Делит массив байтов на блоки
-        private static List<byte[]> SplitBytes(byte[] bytes, int blockSize)
-        {
-            List<byte[]> blocks = new List<byte[]>();
-            for (int i = 0; i < bytes.Length; i += blockSize)
-            {
-                byte[] block = new byte[blockSize];
-                Array.Copy(bytes, i, block, 0, blockSize);
-                blocks.Add(block);
-            }
-            return blocks;
         }
     }
 }
