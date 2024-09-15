@@ -86,8 +86,8 @@ namespace Cryptography.Web.Services
             {
                 // Преобразуем строку в BigInteger
                 var encryptedCharBigInt = BigInteger.Parse(encryptedChar);
-
                 //var encryptedCharBytes = Convert.FromBase64String(encryptedChar);
+
                 //var encryptedCharBigInt = new BigInteger(encryptedCharBytes);
 
                 // Расшифровываем BigInteger

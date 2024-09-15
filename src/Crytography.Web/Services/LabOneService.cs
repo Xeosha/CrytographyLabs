@@ -35,7 +35,6 @@ namespace Crytography.Services
             char[,] playfairTable = new char[4, 8];
             int count = 0;
 
-            Console.WriteLine("Вывод таблицы");
             for (int i = 0; i < playfairTable.GetLength(0); i++)
             {
                 for (int j = 0; j < playfairTable.GetLength(1); j++)

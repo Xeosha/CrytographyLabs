@@ -65,6 +65,7 @@ namespace Crytography.Controllers
             {
                 var keysModel = LabTwoService.GenerateKeys();
                 model = new Lab2Model(keysModel.P, keysModel.Q, keysModel.N, keysModel.E, keysModel.D, keysModel.Y);
+                encryptedText = null;
             }
 
             if (!string.IsNullOrEmpty(inputText))
@@ -74,14 +75,15 @@ namespace Crytography.Controllers
                 if (action == "encrypt")
                 {
                     encryptedText = LabTwoService.Encrypt(inputText, model.E, model.N);
-                    ViewBag.EncryptedText = encryptedText;
-                    TempData["EncryptedText"] = encryptedText;
                 }
-                else if (action == "decrypt" && encryptedText != null)
+                else if (action == "decrypt" && !string.IsNullOrEmpty(encryptedText))
                 {
                     ViewBag.DecryptedText = LabTwoService.Decrypt(encryptedText, model.D, model.N);
                 }
             }
+
+            TempData["EncryptedText"] = encryptedText;
+            ViewBag.EncryptedText = encryptedText;
 
 
 
@@ -105,6 +107,7 @@ namespace Crytography.Controllers
             {
                 var keysModel = LabThreeService.GenerateKeys();
                 model = new Lab3Model(keysModel.N, keysModel.Q, keysModel.X, keysModel.Y, keysModel.Kx, keysModel.Ky, keysModel.A, keysModel.B);
+                encryptedText = null;
             }
 
             if (!string.IsNullOrEmpty(inputText))
@@ -115,15 +118,16 @@ namespace Crytography.Controllers
                 {
                     // Encrypt the input text and store it in TempData for future decryption
                     encryptedText = LabThreeService.Encrypt(inputText, model.Kx, model.N);
-                    TempData["EncryptedText"] = encryptedText;
-                    ViewBag.EncryptedText = encryptedText;
                 }
-                else if (action == "decrypt" && encryptedText != null)
+                else if (action == "decrypt" && !string.IsNullOrEmpty(encryptedText))
                 {
                     // Decrypt the text stored in TempData
                     ViewBag.DecryptedText = LabThreeService.Decrypt(encryptedText, model.Ky, model.N);
                 }
             }
+
+            TempData["EncryptedText"] = encryptedText;
+            ViewBag.EncryptedText = encryptedText;
 
             return View(model);
         }
