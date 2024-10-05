@@ -25,6 +25,7 @@ namespace Cryptography.Web.Services
 
             var (D, Y) = ExtendedGCD(E, phi);
 
+
             if (D < 0)
                 D += phi;
 
@@ -73,7 +74,6 @@ namespace Cryptography.Web.Services
                 //encryptedChars.Add(Convert.ToBase64String(encryptedCharBigInt.ToByteArray()));
             }
 
-            // Соединяем зашифрованные значения через специальный разделитель (например, пробел)
             return string.Join(" ", encryptedChars);
         }
 
@@ -100,12 +100,8 @@ namespace Cryptography.Web.Services
                 decryptedChars.Add(decryptedChar);
             }
 
-            // Преобразуем список символов обратно в строку
             return new string(decryptedChars.ToArray());
         }
-
-
-
 
 
     }

@@ -1,0 +1,93 @@
+﻿@{
+    ViewData["Title"] = "Lab5";
+}
+@model Crytography.Web.Models.Lab5Model
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true">
+    <style>
+        .error { color: #dc3545; font-weight: bold; }
+        .correct { color: #28a745; font-weight: bold; }
+        .parity-bit { color: #007bff; font-weight: bold; }
+        .form-label { font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <!-- Header section -->
+        <header class="mb-4">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h1 class="card-title">Лабораторная работа №5</h1>
+                    <h2 class="card-subtitle text-muted">Вариант №1 (11)</h2>
+                    <p class="card-text mt-3">
+                        Реализовать проверку правильности передачи двоичной кодовой последовательности длиной 8 бит, используя метод кода с одиночным битом четности.
+                    </p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Input section -->
+        <div class="card mb-4">
+            <div class="card-header">
+                Введите 8-битную последовательность
+            </div>
+            <div class="card-body">
+                <form asp-action="Lab5" method="post">
+                    <div class="mb-3">
+                        <label for="InputCode" class="form-label">8-битная последовательность:</label>
+                        <input type="text" name="InputCode" class="form-control" value="@Model.InputCode" maxlength="8" required />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Отправить</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Editable code section -->
+        @if (!string.IsNullOrEmpty(Model.EditableCode))
+        {
+            <div class="card mb-4">
+                <div class="card-header">
+                    Редактируйте 8-битную последовательность
+                </div>
+                <div class="card-body">
+                    <form asp-action="CheckCode" method="post">
+                        <div class="mb-3">
+                            <label class="form-label">Изменяемая последовательность (8 бит):</label>
+                            <input type="text" name="EditableCode" class="form-control" value="@Model.EditableCode" maxlength="8" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Бит четности:</label>
+                            <input type="text" class="form-control parity-bit" name="ParityBit" value="@Model.ParityBit" readonly="true" />
+                        </div>
+                        <button type="submit" class="btn btn-success">Проверить</button>
+                    </form>
+                </div>
+            </div>
+        }
+
+        <!-- Result section -->
+        @if (Model.CheckPerformed)
+        {
+            <div class="alert @Model.HasError ? "alert-danger" : "alert-success" role="alert">
+                @if (Model.HasError)
+                {
+                    <p class="error">Ошибка: Бит четности не совпадает.</p>
+                }
+                else
+                {
+                    <p class="correct">Передача данных корректна.</p>
+                }
+            </div>
+        }
+
+    </div>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js" asp-append-version="true"></script>
+</body>
+</html>

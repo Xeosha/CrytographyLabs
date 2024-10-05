@@ -197,6 +197,67 @@ namespace Crytography.Controllers
         }
 
 
+        [HttpGet]
+        public IActionResult Lab5()
+        {
+            var model = new Lab5Model();
+            return View(model);
+        }
 
+        [HttpPost]
+        public IActionResult Lab5(Lab5Model model)
+        {
+            // Проверяем, что введённая последовательность состоит из 8 бит
+            if (model.InputCode.Length != 8 || !IsBinaryString(model.InputCode))
+            {
+                ModelState.AddModelError("", "Введите корректную 8-битную последовательность (только 0 и 1).");
+                return View("Lab5", model);
+            }
+
+            // Рассчитываем бит четности
+            int parityBit = CalculateParityBit(model.InputCode);
+
+            // Устанавливаем изменяемую последовательность и бит четности
+            model.EditableCode = model.InputCode;
+            model.ParityBit = parityBit;
+
+            // Очищаем результат проверки
+            model.CheckPerformed = false;
+            model.HasError = false;
+
+            return View("Lab5", model);
+        }
+
+        [HttpPost]
+        public IActionResult CheckCode(Lab5Model model)
+        {
+            // Проверяем, что редактируемая часть состоит из 8 бит
+            if (model.EditableCode.Length != 8 || !IsBinaryString(model.EditableCode))
+            {
+                ModelState.AddModelError("", "Изменяемая часть должна содержать 8 бит (только 0 и 1).");
+                return View("Index", model);
+            }
+
+            // Рассчитываем ожидаемый бит четности
+            int expectedParityBit = CalculateParityBit(model.EditableCode);
+
+            // Проверяем наличие ошибки
+            model.HasError = expectedParityBit != model.ParityBit;
+            model.CheckPerformed = true;
+
+            return View("Lab5", model);
+        }
+
+        private bool IsBinaryString(string input)
+        {
+            return input.All(c => c == '0' || c == '1');
+        }
+
+        private int CalculateParityBit(string binaryString)
+        {
+            int count = binaryString.Count(c => c == '1');
+            return count % 2 == 0 ? 0 : 1; // Возвращаем 0 если четное количество, иначе 1
+        }
     }
+
 }

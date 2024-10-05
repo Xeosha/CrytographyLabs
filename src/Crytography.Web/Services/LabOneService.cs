@@ -14,13 +14,19 @@ namespace Crytography.Services
             key = key.ToUpper();
 
             if (!IsValidText(inputText))
-                return "Неверный текст";
+                return "Неверный текст!";
 
             var playfairTable = CreateTable(key);
 
             var bigrams = SplitIntoBigrams(inputText);
 
-            return EncryptBigrams(bigrams, playfairTable);
+            try
+            {
+                return EncryptBigrams(bigrams, playfairTable);
+            } catch
+            {
+                return "только русский алфавит!";
+            }
         }
 
         private static char[,] CreateTable(string key)
