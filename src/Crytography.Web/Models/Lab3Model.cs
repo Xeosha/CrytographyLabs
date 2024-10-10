@@ -14,7 +14,7 @@ namespace Crytography.Web.Models
         public BigInteger A { get; set; } = 0;
         public BigInteger B { get; set; } = 0;
 
-        public Lab3Model() { }  
+        public Lab3Model() { }
         public Lab3Model(BigInteger n, BigInteger q, BigInteger x, BigInteger y, BigInteger kx, BigInteger ky, BigInteger a, BigInteger b)
         {
             N = n;

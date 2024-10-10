@@ -1,8 +1,8 @@
 using Cryptography.Web.Services;
-using Crytography.Models;
 using Crytography.Services;
 using Crytography.Web.Models;
 using Crytography.Web.Services;
+using Crytography.Web.Services.Lab6Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Text;
@@ -207,19 +207,19 @@ namespace Crytography.Controllers
         [HttpPost]
         public IActionResult Lab5(Lab5Model model)
         {
-            // Проверяем, что введённая последовательность состоит из 8 бит
-            if (model.InputCode.Length != 8 || !IsBinaryString(model.InputCode))
+        // Проверяем, что введённая последовательность состоит из 8 бит
+            if (model.InputCode.Length != 8 || !Lab5Service.IsBinaryString(model.InputCode))
             {
                 ModelState.AddModelError("", "Введите корректную 8-битную последовательность (только 0 и 1).");
                 return View("Lab5", model);
             }
 
             // Рассчитываем бит четности
-            int parityBit = CalculateParityBit(model.InputCode);
+            int parityBit = Lab5Service.CalculateParityBit(model.InputCode);
 
             // Устанавливаем изменяемую последовательность и бит четности
             model.EditableCode = model.InputCode;
-            model.ParityBit = parityBit;
+            model.OldParityBit = model.ParityBit = parityBit;
 
             // Очищаем результат проверки
             model.CheckPerformed = false;
@@ -232,31 +232,113 @@ namespace Crytography.Controllers
         public IActionResult CheckCode(Lab5Model model)
         {
             // Проверяем, что редактируемая часть состоит из 8 бит
-            if (model.EditableCode.Length != 8 || !IsBinaryString(model.EditableCode))
+            if (model.EditableCode.Length != 8 || !Lab5Service.IsBinaryString(model.EditableCode))
             {
                 ModelState.AddModelError("", "Изменяемая часть должна содержать 8 бит (только 0 и 1).");
-                return View("Index", model);
+                return View("Lab5", model);
             }
 
             // Рассчитываем ожидаемый бит четности
-            int expectedParityBit = CalculateParityBit(model.EditableCode);
+            model.ParityBit = Lab5Service.CalculateParityBit(model.EditableCode);
 
             // Проверяем наличие ошибки
-            model.HasError = expectedParityBit != model.ParityBit;
-            model.CheckPerformed = true;
+            model.HasError = model.OldParityBit != model.ParityBit;
+            model.CheckPerformed = true;    
 
             return View("Lab5", model);
         }
 
-        private bool IsBinaryString(string input)
+        [HttpGet]
+        public IActionResult Lab6()
         {
-            return input.All(c => c == '0' || c == '1');
+            var model = new Lab4Model();
+            return View(model);
         }
 
-        private int CalculateParityBit(string binaryString)
+
+        [HttpPost]
+        public async Task<IActionResult> CompressFile(string CompressionMethod, IFormFile FileToCompress, string compressedFilePathSave)
         {
-            int count = binaryString.Count(c => c == '1');
-            return count % 2 == 0 ? 0 : 1; // Возвращаем 0 если четное количество, иначе 1
+            if (FileToCompress == null || FileToCompress.Length == 0)
+            {
+                return BadRequest("Файл для сжатия не выбран.");
+            }
+
+
+            byte[] fileBytes;
+            using (var inputStream = FileToCompress.OpenReadStream())
+            {
+                fileBytes = await ReadFullyAsync(inputStream);
+            }
+
+            var encryptedText = System.Text.Encoding.UTF8.GetString(fileBytes);
+
+            ICoder coder;
+
+            if (CompressionMethod == "Arithmetic")
+            {
+                coder = new ArithmeticCoder(encryptedText.Length);
+            }
+            else if (CompressionMethod == "LZ77")
+            {
+                coder = new Lz77Coder();
+            }
+            else
+            {
+                coder = new DoubleCoder(encryptedText.Length);
+            }
+
+            var compress = coder.Encode(encryptedText);
+
+            Console.WriteLine("File path: " + FileToCompress.Name);
+            Console.WriteLine("My file name: " + compressedFilePathSave);
+
+
+            return File(compress, "application/octet-stream", compressedFilePathSave + ".dat");
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> DecompressFile(string DeCompressionMethod, IFormFile FileToDeCompress, string decompressedFilePathSave)
+        {
+            if (DeCompressionMethod == null || FileToDeCompress.Length == 0)
+            {
+                return BadRequest("Файл для распаковки не выбран.");
+            }
+
+            if (string.IsNullOrWhiteSpace(decompressedFilePathSave))
+            {
+                return BadRequest("Введите имя для сохранения распакованного файла.");
+            }
+
+
+            byte[] fileBytes;
+            using (var inputStream = FileToDeCompress.OpenReadStream())
+            {
+                fileBytes = await ReadFullyAsync(inputStream);
+            }
+
+            ICoder coder;
+
+            if (DeCompressionMethod == "Arithmetic")
+            {
+                coder = new ArithmeticCoder(encryptedText.Length);
+            }
+            else if (DeCompressionMethod == "LZ77")
+            {
+                coder = new Lz77Coder();
+            }
+            else
+            {
+                coder = new DoubleCoder(encryptedText.Length);
+            }
+
+            var decompress = coder.Decode(fileBytes);
+
+            var decompressBytes = Encoding.UTF8.GetBytes(decompress);
+
+
+            return File(decompressBytes, "application/octet-stream", decompressedFilePathSave + ".txt");
         }
     }
 

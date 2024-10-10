@@ -1,0 +1,84 @@
+﻿@model Lab4Model
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true">
+</head>
+<body>
+    <div class="container my-5">
+        <header class="text-center mb-5">
+            <h1 class="display-4">Лабораторная работа №6</h1>
+            <h2 class="text-muted">Вариант №11 (7)</h2>
+            <p class="lead">
+                Выполнить сжатие файла методом арифметического кодирования, LZ77 и двуступенчатым сжатием.
+            </p>
+        </header>
+
+        <div class="row">
+            <!-- Карточка для сжатия файла -->
+            <div class="col-md-6">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h2 class="card-title">Сжатие файла</h2>
+                        <form asp-action="CompressFile" method="post" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label for="compressionMethod" class="form-label">Метод сжатия:</label>
+                                <select id="compressionMethod" name="CompressionMethod" class="form-select" required>
+                                    <option value="" disabled selected>Выберите метод сжатия</option>
+                                    <option value="Arithmetic">Арифметическое кодирование</option>
+                                    <option value="LZ77">LZ77</option>
+                                    <option value="TwoPhase">Двуступенчатое сжатие</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="file" class="form-label">Файл для сжатия:</label>
+                                <input type="file" id="file" name="FileToCompress" class="form-control" accept=".txt" required />
+                            </div>
+                            <div class="mb-3">
+                                <label for="compressedFilePathSave" class="form-label">Путь для сохранения сжатого файла:</label>
+                                <input type="text" id="compressedFilePathSave" name="CompressedFilePathSave" class="form-control" placeholder="Введите имя файла для сохранения" required />
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Сжать файл</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Карточка для распаковки файла -->
+            <div class="col-md-6">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h2 class="card-title">Распаковка файла</h2>
+                        <form asp-action="DecompressFile" method="post" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label for="decompressionMethod" class="form-label">Метод распаковки:</label>
+                                <select id="decompressionMethod" name="DeCompressionMethod" class="form-select" required>
+                                    <option value="" disabled selected>Выберите метод распаковки</option>
+                                    <option value="Arithmetic">Арифметическое кодирование</option>
+                                    <option value="LZ77">LZ77</option>
+                                    <option value="TwoPhase">Двуступенчатое сжатие</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="file" class="form-label">Сжатый файл для распаковки:</label>
+                                <input type="file" id="file" name="FileToDeCompress" class="form-control" accept=".dat" required />
+                            </div>
+                            <div class="mb-3">
+                                <label for="decompressedFilePathSave" class="form-label">Путь для сохранения распакованного файла:</label>
+                                <input type="text" id="decompressedFilePathSave" name="DeCompressedFilePathSave" class="form-control" placeholder="Введите имя файла для сохранения" required />
+                            </div>
+                            <button type="submit" class="btn btn-success w-100">Распаковать файл</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

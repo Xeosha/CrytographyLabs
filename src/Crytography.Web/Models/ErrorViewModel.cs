@@ -1,4 +1,4 @@
-namespace Crytography.Models
+namespace Crytography.Web.Models
 {
     public class ErrorViewModel
     {
