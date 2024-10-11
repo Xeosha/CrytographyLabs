@@ -277,7 +277,7 @@ namespace Crytography.Controllers
 
             if (CompressionMethod == "Arithmetic")
             {
-                coder = new ArithmeticCoder(encryptedText.Length);
+                coder = new ArithmeticCoder();
             }
             else if (CompressionMethod == "LZ77")
             {
@@ -285,7 +285,7 @@ namespace Crytography.Controllers
             }
             else
             {
-                coder = new DoubleCoder(encryptedText.Length);
+                coder = new DoubleCoder();
             }
 
             var compress = coder.Encode(encryptedText);
@@ -322,7 +322,7 @@ namespace Crytography.Controllers
 
             if (DeCompressionMethod == "Arithmetic")
             {
-                coder = new ArithmeticCoder(encryptedText.Length);
+                coder = new ArithmeticCoder();
             }
             else if (DeCompressionMethod == "LZ77")
             {
@@ -330,7 +330,7 @@ namespace Crytography.Controllers
             }
             else
             {
-                coder = new DoubleCoder(encryptedText.Length);
+                coder = new DoubleCoder();
             }
 
             var decompress = coder.Decode(fileBytes);

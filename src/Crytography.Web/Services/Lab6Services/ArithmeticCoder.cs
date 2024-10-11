@@ -4,13 +4,11 @@
     {
         private List<char> _alphabet = new();
         private List<decimal> _probabilities = new();
-        private int _inputLenght;
 
-        public ArithmeticCoder(int inputLenght)
+        public ArithmeticCoder()
         {
             _alphabet = new List<char>();
             _probabilities = new List<decimal>();
-            _inputLenght = inputLenght;
 
             // Fill alphabet and probabilities
             foreach (char c in "abcdefghijklmnopqrstuvwxyz ")
@@ -22,14 +20,33 @@
 
         public string Decode(byte[] input)
         {
-            var stringInput = GlobalService.binaryToString(input);
-            return DecompressString(stringInput, _alphabet, _probabilities, _inputLenght, 20);
+            // Извлекаем длину оригинального текста
+            var originalLengthBytes = new byte[4]; // 4 байта для int
+            Buffer.BlockCopy(input, 0, originalLengthBytes, 0, 4);
+            int originalLength = BitConverter.ToInt32(originalLengthBytes, 0);
+
+            // Убираем префикс длины из входных данных
+            byte[] compressedData = new byte[input.Length - 4];
+            Buffer.BlockCopy(input, 4, compressedData, 0, compressedData.Length);
+
+            var stringInput = GlobalService.binaryToString(compressedData);
+            return DecompressString(stringInput, _alphabet, _probabilities, originalLength, 20);
         }
 
         public byte[] Encode(string input)
         {
-            var res = CompressString(input, _alphabet, _probabilities, 20);
-            return GlobalService.binaryStringToByteArray(res);
+            var compressedString = CompressString(input, _alphabet, _probabilities, 20);
+
+            // Создаем массив для длины оригинального текста и закодированных данных
+            var originalLengthBytes = BitConverter.GetBytes(input.Length);
+            var res = GlobalService.binaryStringToByteArray(compressedString);
+
+            // Объединяем длину и закодированные данные
+            var finalData = new byte[originalLengthBytes.Length + res.Length];
+            Buffer.BlockCopy(originalLengthBytes, 0, finalData, 0, originalLengthBytes.Length);
+            Buffer.BlockCopy(res, 0, finalData, originalLengthBytes.Length, res.Length);
+
+            return finalData;
         }
 
 

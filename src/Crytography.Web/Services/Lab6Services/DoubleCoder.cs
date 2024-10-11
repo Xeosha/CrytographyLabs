@@ -4,11 +4,11 @@ namespace Crytography.Web.Services.Lab6Services
 {
     public class DoubleCoder : ICoder
     {
-        private int _inputLenght;
-        public DoubleCoder(int inputLenght)
+        private ICoder _arithmeticCoder, _Lz77Coder;
+
+        public DoubleCoder()
         {
-            _inputLenght = inputLenght;
-            _arithmeticCoder = new ArithmeticCoder(_inputLenght);
+            _arithmeticCoder = new ArithmeticCoder();
             _Lz77Coder = new Lz77Coder();
         }
 
