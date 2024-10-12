@@ -2,7 +2,7 @@
 {
     public interface ICoder
     {
-        public string Decode(byte[] input);
-        public byte[] Encode(string input);
+        public byte[] Decode(byte[] input);
+        public byte[] Encode(byte[] input);
     }
 }

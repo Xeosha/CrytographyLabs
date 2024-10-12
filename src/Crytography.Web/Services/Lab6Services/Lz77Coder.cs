@@ -4,10 +4,9 @@ namespace Crytography.Web.Services.Lab6Services
 {
     public class Lz77Coder : ICoder
     {
-        public byte[] Encode(string input)
+        public byte[] Encode(byte[] input)
         {
-            var byteArr = Encoding.UTF8.GetBytes(input);
-            var lz77Compressed = Compress(byteArr);
+            var lz77Compressed = Compress(input);
 
             StringBuilder compressedString = new StringBuilder();
             foreach (var (offset, length, nextChar) in lz77Compressed)
@@ -28,7 +27,7 @@ namespace Crytography.Web.Services.Lab6Services
             }
         }
 
-        public string Decode(byte[] input)
+        public byte[] Decode(byte[] input)
         {
             var lz77Compressed = new List<Tuple<int, int, byte>>();
 
@@ -41,7 +40,7 @@ namespace Crytography.Web.Services.Lab6Services
             }
 
             var lz77DeCompressed = Decompress(lz77Compressed);
-            return Encoding.UTF8.GetString(lz77DeCompressed);
+            return lz77DeCompressed;
         }
 
         public static int CalculateLZ77CompressedSize(List<Tuple<int, int, byte>> compressed)

@@ -271,8 +271,6 @@ namespace Crytography.Controllers
                 fileBytes = await ReadFullyAsync(inputStream);
             }
 
-            var encryptedText = System.Text.Encoding.UTF8.GetString(fileBytes);
-
             ICoder coder;
 
             if (CompressionMethod == "Arithmetic")
@@ -285,14 +283,10 @@ namespace Crytography.Controllers
             }
             else
             {
-                coder = new DoubleCoder();
+                coder = new DoubleCoder(new ArithmeticCoder(), new Lz77Coder());
             }
 
-            var compress = coder.Encode(encryptedText);
-
-            Console.WriteLine("File path: " + FileToCompress.Name);
-            Console.WriteLine("My file name: " + compressedFilePathSave);
-
+            var compress = coder.Encode(fileBytes);
 
             return File(compress, "application/octet-stream", compressedFilePathSave + ".dat");
         }
@@ -330,15 +324,12 @@ namespace Crytography.Controllers
             }
             else
             {
-                coder = new DoubleCoder();
+                coder = new DoubleCoder(new ArithmeticCoder(), new Lz77Coder());
             }
 
             var decompress = coder.Decode(fileBytes);
 
-            var decompressBytes = Encoding.UTF8.GetBytes(decompress);
-
-
-            return File(decompressBytes, "application/octet-stream", decompressedFilePathSave + ".txt");
+            return File(decompress, "application/octet-stream", decompressedFilePathSave + ".txt");
         }
     }
 

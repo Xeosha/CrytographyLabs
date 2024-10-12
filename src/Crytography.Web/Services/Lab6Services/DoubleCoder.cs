@@ -6,31 +6,27 @@ namespace Crytography.Web.Services.Lab6Services
     {
         private ICoder _arithmeticCoder, _Lz77Coder;
 
-        public DoubleCoder()
+        public DoubleCoder(ICoder arithmeticCode, ICoder Lz77Coder)
         {
-            _arithmeticCoder = new ArithmeticCoder();
-            _Lz77Coder = new Lz77Coder();
+            _arithmeticCoder = arithmeticCode;
+            _Lz77Coder = Lz77Coder;
         }
 
 
-        public byte[] Encode(string input)
+        public byte[] Encode(byte[] input)
         {
             var res1 = _arithmeticCoder.Encode(input);
 
-            var binary = GlobalService.binaryToString(res1);
-
-            var res2 = _Lz77Coder.Encode(binary);
+            var res2 = _Lz77Coder.Encode(res1);
 
             return res2;
         }
 
-        public string Decode(byte[] input)
+        public byte[] Decode(byte[] input)
         {
             var res2 = _Lz77Coder.Decode(input);
 
-            var str = GlobalService.binaryStringToByteArray(res2);
-
-            var res1 = _arithmeticCoder.Decode(str);
+            var res1 = _arithmeticCoder.Decode(res2);
 
             return res1;
         }
