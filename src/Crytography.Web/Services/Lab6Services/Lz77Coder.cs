@@ -47,6 +47,7 @@ namespace Crytography.Web.Services.Lab6Services
         {
             return compressed.Count * (8 + 8 + 8) / 8; // смещение, длина совпадения, следующий символ в битах ./8 - байты
         }
+
         public static List<Tuple<int, int, byte>> Compress(byte[] input)
         {
             List<Tuple<int, int, byte>> output = new List<Tuple<int, int, byte>>();
