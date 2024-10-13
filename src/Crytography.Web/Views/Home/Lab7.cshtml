@@ -1,0 +1,81 @@
+﻿@model Crytography.Web.Models.Lab7Model
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true">
+</head>
+<body>
+    <div class="container my-5">
+        <header class="text-center mb-5">
+            <h1 class="display-4">Лабораторная работа №7</h1>
+            <h2 class="text-muted">Вариант №11</h2>
+            <p class="lead">
+                Написать программу, реализующую методику хеширования паролей,
+                используя в качестве блочного шифра  для реализации алгоритма, написанного ранее в лабораторной работе №4.
+                Длина хеша: 20
+            </p>
+        </header>
+
+        <!-- Карточка для хеширования пароля -->
+        <div class="card mb-4">
+            <div class="card-header">Хеширование пароля</div>
+            <div class="card-body">
+                <form asp-action="HashPassword" method="post" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Введите пароль (от 4 до 18 символов)</label>
+                        <input type="text" class="form-control" id="password" name="Password" value="@Model.Password" required>
+                        <small class="form-text text-muted">Пароль должен содержать от 4 до 18 символов.</small>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Сгенерировать хеш</button>
+                </form>
+                @if (!string.IsNullOrEmpty(Model.HashedPassword))
+                {
+                    <div class="mt-4 alert alert-success">
+                        <strong>Захешированный пароль:</strong> @Model.HashedPassword
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                {
+                    <div class="mt-4 alert alert-danger">
+                        @Model.ErrorMessage
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Карточка для проверки пароля -->
+        <div class="card">
+            <div class="card-header">Проверка пароля</div>
+            <div class="card-body">
+                <form asp-action="VerifyPassword" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="Plaintext" value="@Model.HashedPassword" />
+                    <input type="hidden" name="Plaintext" value="@Model.Password" />
+                    <div class="mb-3">
+                        <label for="checkPassword" class="form-label">Введите пароль для проверки</label>
+                        <input type="text" class="form-control" id="checkPassword" name="CheckPassword" value="@Model.CheckPassword" required>
+                        <small class="form-text text-muted">Пароль должен содержать от 4 до 18 символов.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="hashedPassword" class="form-label">Введите хеш пароля</label>
+                        <input type="text" class="form-control" id="hashedPassword" name="HashedPasswordInput" value="@Model.HashedPasswordInput" required>
+                    </div>
+                    <button type="submit" class="btn btn-success">Проверить пароль</button>
+                </form>
+                @if (!string.IsNullOrEmpty(Model.VerificationResult))
+                {
+                    <div class="mt-4 alert alert-info">
+                        <strong>Результат проверки:</strong> @Model.VerificationResult
+                    </div>
+                }
+            </div>
+        </div>
+
+    </div>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

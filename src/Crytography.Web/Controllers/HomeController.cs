@@ -331,6 +331,95 @@ namespace Crytography.Controllers
 
             return File(decompress, "application/octet-stream", decompressedFilePathSave + ".txt");
         }
+
+        [HttpGet]
+        public IActionResult Lab7()
+        {
+            return View(new Lab7Model());
+        }
+
+        [HttpPost]
+        public IActionResult HashPassword(Lab7Model model)
+        {
+            try
+            {
+                var hashedPassword = Lab7Service.HashPassword(model.Password);
+                model.HashedPassword = hashedPassword;
+                model.ErrorMessage = null; // Сбрасываем сообщение об ошибке
+            }
+            catch (ArgumentException ex)
+            {
+                model.HashedPassword = null; // Сбрасываем хеш
+                model.ErrorMessage = ex.Message;
+            }
+
+            return View("Lab7", model);
+        }
+
+        [HttpPost]
+        public IActionResult VerifyPassword(Lab7Model model)
+        {
+            var result = Lab7Service.VerifyPassword(model.CheckPassword, model.HashedPasswordInput);
+            model.VerificationResult = result ? "Пароль корректен." : "Пароль некорректен.";
+
+            return View("Lab7", model);
+        }
+
+        [HttpGet]
+        public IActionResult Lab8()
+        {
+            return View(new Lab8Model());
+        }
+
+        [HttpPost]
+        public IActionResult Encrypt(Lab8Model model)
+        {
+            try
+            {
+                // Генерация гаммы
+                int blockCount = (Encoding.UTF8.GetByteCount(model.Plaintext) + 3) / 4; // Количество блоков по 4 байта
+                var gammaList = Lab8Service.GenerateListGamma(blockCount); // Получение гаммы
+
+                // Шифрование текста
+                model.Ciphertext = Lab8Service.Encrypt(model.Plaintext, gammaList);
+
+                Console.WriteLine(model.Ciphertext);    
+
+                model.GammaList = string.Join(", ", gammaList); // Преобразование гаммы в строку
+                model.ErrorMessage = null; // Сбрасываем сообщение об ошибке
+            }
+            catch (Exception ex)
+            {
+                model.Ciphertext = null; // Сбрасываем шифротекст
+                model.ErrorMessage = ex.Message;
+            }
+
+            return View("Lab8", model);
+        }
+
+        [HttpPost]
+        public IActionResult Decrypt(Lab8Model model)
+        {
+            try
+            {
+                // Преобразование гаммы обратно в массив uint
+                var gammaList = Array.ConvertAll(model.GammaList.Split(", "), uint.Parse);
+
+                // Расшифрование текста
+                model.DecryptedText = Lab8Service.Decrypt(model.Ciphertext, gammaList);
+
+                Console.WriteLine(model.DecryptedText);
+
+                model.ErrorMessage = null; // Сбрасываем сообщение об ошибке
+            }
+            catch (Exception ex)
+            {
+                model.DecryptedText = null; // Сбрасываем расшифрованный текст
+                model.ErrorMessage = ex.Message;
+            }
+
+            return View("Lab8", model);
+        }
     }
 
 }

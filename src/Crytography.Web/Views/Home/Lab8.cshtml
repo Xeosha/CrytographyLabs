@@ -1,0 +1,78 @@
+﻿@model Crytography.Web.Models.Lab8Model
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true">
+</head>
+<body>
+    <div class="container my-5">
+        <header class="text-center mb-5">
+            <h1 class="display-4">Лабораторная работа №8</h1>
+            <h2 class="text-muted">Вариант №11 (1)</h2>
+            <p class="lead">
+                Реализовать шифрование сообщения  методом однократного гаммирования, используя блоки открытого текста длиной 32 бита и используя в алгоритме шифрования операцию сложения
+            </p>
+        </header>
+
+        <!-- Карточка для шифрования сообщения -->
+        <div class="card mb-4">
+            <div class="card-header">Шифрование сообщения</div>
+            <div class="card-body">
+                <form asp-action="Encrypt" method="post" enctype="multipart/form-data">       
+                    <div class="mb-3">
+                        <label for="plaintext" class="form-label">Введите сообщение для шифрования</label>
+                        <input type="text" class="form-control" id="plaintext" name="Plaintext" value="@Model.Plaintext" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Зашифровать</button>
+                </form>
+                @if (!string.IsNullOrEmpty(Model.Ciphertext) && !string.IsNullOrEmpty(Model.Plaintext))
+                {
+                    <div class="mt-4 alert alert-success">
+                        <strong>Шифротекст:</strong> @Model.Ciphertext
+                    </div>
+                }      
+            </div>
+        </div>
+
+        <!-- Карточка для расшифрования сообщения -->
+        <div class="card">
+            <div class="card-header">Расшифрование сообщения</div>
+            <div class="card-body">
+                <form asp-action="Decrypt" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="Plaintext" value="@Model.Plaintext" />
+                    <div class="mb-3">
+                        <label for="ciphertext" class="form-label">Введите шифротекст</label>
+                        <input type="text" class="form-control" id="ciphertext" name="Ciphertext" value="@Model.Ciphertext" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="gammaList" class="form-label">Введите гамму (через запятую)</label>
+                        <input type="text" class="form-control" id="gammaList" name="GammaList" value="@Model.GammaList" required>
+                    </div>
+                    <button type="submit" class="btn btn-success">Расшифровать</button>
+                </form>
+                @if (!string.IsNullOrEmpty(Model.DecryptedText))
+                {
+                    <div class="mt-4 alert alert-info">
+                        <strong>Расшифрованный текст:</strong> @Model.DecryptedText
+                    </div>
+                }
+            </div> 
+        </div>
+
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="mt-4 alert alert-danger">
+                @Model.ErrorMessage
+            </div>
+        }
+
+    </div>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -22,7 +22,7 @@ namespace Crytography.Web.Services.Lab6Services
         public byte[] Encode(byte[] input)
         {
             var inputStr = Encoding.UTF8.GetString(input);
-            var compressedString = CompressString(inputStr, _alphabet, _probabilities, 20);
+            var compressedString = CompressString(inputStr, _alphabet, _probabilities, 18);
 
             // Создаем массив для длины оригинального текста и закодированных данных
             var originalLengthBytes = BitConverter.GetBytes(input.Length);
@@ -48,7 +48,7 @@ namespace Crytography.Web.Services.Lab6Services
             Buffer.BlockCopy(input, 4, compressedData, 0, compressedData.Length);
 
             var stringInput = GlobalService.binaryToString(compressedData);
-            var res = DecompressString(stringInput, _alphabet, _probabilities, originalLength, 20);
+            var res = DecompressString(stringInput, _alphabet, _probabilities, originalLength, 18);
 
  
             return Encoding.UTF8.GetBytes(res);
