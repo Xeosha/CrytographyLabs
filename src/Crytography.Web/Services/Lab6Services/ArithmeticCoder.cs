@@ -100,8 +100,8 @@ namespace Crytography.Web.Services.Lab6Services
         }
 
 
-        static decimal ArithmeticEncode(string input, List<char> alphabet, List<decimal> probabilities, int blockSize = 16)
-        {
+        static decimal ArithmeticEncode(string input, List<char> alphabet, List<decimal> probabilities)
+        {   
             decimal low = 0.0m;
             decimal high = 1.0m;
 
@@ -110,8 +110,9 @@ namespace Crytography.Web.Services.Lab6Services
                 char c = input[i];
                 int index = alphabet.IndexOf(c);
                 if (index < 0) throw new ArgumentException($"Character '{c}' not in alphabet."); // Проверка на наличие символа
+
                 decimal range = high - low;
-                high = low + range * (GetCumulativeProbability(probabilities, index + 1));
+                high = low + range * GetCumulativeProbability(probabilities, index + 1);
                 low = low + range * GetCumulativeProbability(probabilities, index);
             }
 

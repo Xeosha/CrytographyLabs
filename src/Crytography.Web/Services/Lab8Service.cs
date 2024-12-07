@@ -66,12 +66,6 @@ namespace Crytography.Web.Services
             var ciphertextBytes = Convert.FromBase64String(ciphertext);
             var ciphertextBlocks = ConvertToBlocks(ciphertextBytes);
 
-            // Проверка на совпадение длины гаммы с длиной блоков шифротекста
-            if (gammaLst.Length < ciphertextBlocks.Length)
-            {
-                throw new ArgumentException("Недостаточно гаммы для расшифрования.");
-            }
-
             // Расшифровка блоков
             List<byte> decryptedBytes = new List<byte>();
             for (int i = 0; i < ciphertextBlocks.Length; i++)
@@ -82,7 +76,7 @@ namespace Crytography.Web.Services
                 // Заполнение расшифрованного массива байтов
                 for (int j = 0; j < 4; j++)
                 {
-                    decryptedBytes.Add((byte)((decryptedBlock >> (24 - j * 8)) & 0xFF));
+                    decryptedBytes.Add((byte)((decryptedBlock >> (24 - j * 8)) & 0xFF)); // 0xFF для получения младешего байта
                 }
             }
 
